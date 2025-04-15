@@ -10,7 +10,7 @@
                 "-g",
                 "${workspaceFolder}/main.cpp",
                 "${workspaceFolder}/dependencies/src/glad.c",
-                "${workspaceFolder}/stb_image_impl.cpp",
+                //"${workspaceFolder}/stb_image_impl.cpp",
                 "-o",
                 "${workspaceFolder}/OpenGL_Setup.exe",
                 "-I${workspaceFolder}/dependencies/include",
