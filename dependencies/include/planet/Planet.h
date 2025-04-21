@@ -12,11 +12,23 @@ public:
     Planet(float radius, int sectors, int stacks, const std::string& texturePath);
     ~Planet();
 
-    
+    void update(float deltaTime);
+    void draw(unsigned int shaderProgram);
+
+    void setPosition(const glm::vec3& position);
+    void setRotationSpeed(float speed);
+    void setScale(float scale);
 
 private:
     Sphere sphere;
-    
+    unsigned int textureID;
+
+    glm::vec3 position;
+    float rotationSpeed;
+    float angle;
+    float scale;
+
+    unsigned int loadTexture(const std::string& texPath);
 };
 
-#endif 
+#endif
