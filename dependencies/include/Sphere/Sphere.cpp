@@ -200,7 +200,7 @@ void Sphere::draw() const {
 
         glBindVertexArray(0);
         buffersInitialized = true;
-
+        //number of triangles used?
         std::cout << "[Sphere] VAO created with " << indices.size() / 3 << " triangles.\n";
     }
 
