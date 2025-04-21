@@ -16,7 +16,13 @@ Planet::~Planet()
 
 void Planet::update(float deltaTime)
 {
+    //rotation
     angle += rotationSpeed * deltaTime;
+
+    // Orbiting
+    orbitAngle += orbitSpeed * deltaTime;
+    position.x = orbitCenter.x + orbitRadius * cos(orbitAngle);
+    position.z = orbitCenter.z + orbitRadius * sin(orbitAngle);
 }
 
 void Planet::draw(unsigned int shaderProgram)
@@ -25,13 +31,13 @@ void Planet::draw(unsigned int shaderProgram)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, position);
-    model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(scale));
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = translate(trans, position);
+    trans = rotate(trans, angle, glm::vec3(0.0f, 1.0f, 0.0f));
+    trans = glm::scale(trans, glm::vec3(scale));
 
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "transform");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
     sphere.draw();
 }
@@ -49,6 +55,12 @@ void Planet::setRotationSpeed(float speed)
 void Planet::setScale(float s)
 {
     scale = s;
+}
+void Planet::setOrbit(float radius, float speed, const glm::vec3 &center)
+{
+    orbitRadius = radius;
+    orbitSpeed = speed;
+    orbitCenter = center;
 }
 
 unsigned int Planet::loadTexture(const std::string &path)
@@ -68,8 +80,8 @@ unsigned int Planet::loadTexture(const std::string &path)
 
     if (data)
     {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
         stbi_image_free(data);
     }

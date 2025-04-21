@@ -7,17 +7,20 @@
 #include <Sphere/Sphere.h>
 #include <string>
 
-class Planet {
+class Planet
+{
 public:
-    Planet(float radius, int sectors, int stacks, const std::string& texturePath);
+    Planet(float radius, int sectors, int stacks, const std::string &texturePath);
     ~Planet();
 
     void update(float deltaTime);
     void draw(unsigned int shaderProgram);
 
-    void setPosition(const glm::vec3& position);
+    void setPosition(const glm::vec3 &position);
     void setRotationSpeed(float speed);
     void setScale(float scale);
+    void setOrbit(float radius, float speed, const glm::vec3 &center = glm::vec3(0.0f));
+
 
 private:
     Sphere sphere;
@@ -28,7 +31,12 @@ private:
     float angle;
     float scale;
 
-    unsigned int loadTexture(const std::string& texPath);
+    float orbitRadius = 0.0f;
+    float orbitSpeed = 0.0f;
+    float orbitAngle = 0.0f;
+    glm::vec3 orbitCenter = glm::vec3(0.0f);
+
+    unsigned int loadTexture(const std::string &texPath);
 };
 
 #endif
