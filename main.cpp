@@ -8,6 +8,30 @@
 #include "Timer/Timer.h"
 #include <camera/camera.h>
 
+void processInput(GLFWwindow *window, Camera &camera, float deltaTime, Planet &sun, Planet &earth)
+{
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+
+    // Sun's spin speed
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        sun.increaseOrbitSpeed();
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        sun.decreaseOrbitSpeed();
+
+    // Moon's orbit speed
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        earth.increaseRotationSpeed();
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        earth.decreaseRotationSpeed();
+}
+
 const char *vertexShaderSource = "#version 330 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
                                  "layout (location = 1) in vec3 aNormal;\n"
@@ -116,16 +140,45 @@ int main()
     glDeleteShader(fragmentShader);
 
     // creating sun
-    Planet sun(1.0f, 72, 36, "PlanetTextureMaps/sunmap.jpg");
+    Planet sun(0.2f, 72, 36, "PlanetTextureMaps/sunmap.jpg");
     sun.setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
     sun.setRotationSpeed(0.1f);
     sun.setScale(1.0f);
 
-    Planet earth(0.3f, 72, 36, "PlanetTextureMaps/earthmap1k.jpg");
-    earth.setPosition(glm::vec3(2.5f, 0.0f, 0.0f));
+    // creating venus
+    Planet venus(0.08f, 72, 36, "PlanetTextureMaps/venusmap.jpg");
+    venus.setPosition(glm::vec3(1.0f, 0.0f, 0.0f));
+    venus.setRotationSpeed(2.0f);
+    venus.setScale(1.03f);
+    venus.setOrbit(0.5f, 0.4f);
+
+    // creating earth
+    Planet earth(0.09f, 72, 36, "PlanetTextureMaps/earthmap1k.jpg");
+    earth.setPosition(glm::vec3(1.5f, 0.0f, 0.0f));
     earth.setRotationSpeed(2.0f);
-    earth.setScale(1.0f);
-    earth.setOrbit(2.0f, 0.5f);
+    earth.setScale(1.01f);
+    earth.setOrbit(0.9f, 0.5f);
+
+    // creating moon
+    Planet moon(0.03f, 72, 36, "PlanetTextureMaps/earthmap1k.jpg");
+    moon.setPosition(glm::vec3(1.51f, 0.0f, 0.0f));
+    moon.setRotationSpeed(2.0f);
+    moon.setScale(1.01f);
+    moon.setOrbit(1.11f, 0.5f);
+
+    // creating mars
+    Planet mars(0.07f, 72, 36, "PlanetTextureMaps/marsmap1k.jpg");
+    mars.setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
+    mars.setRotationSpeed(2.0f);
+    mars.setScale(1.02f);
+    mars.setOrbit(1.3f, 0.45f);
+
+    // creating neptune
+    Planet neptune(0.1f, 72, 36, "PlanetTextureMaps/neptunemap.jpg");
+    neptune.setPosition(glm::vec3(2.5f, 0.0f, 0.0f));
+    neptune.setRotationSpeed(2.0f);
+    neptune.setScale(1.04f);
+    neptune.setOrbit(1.8f, 0.4f);
 
     Timer timer;
     float deltaTime = 0.0f;
@@ -139,6 +192,7 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         timer.start();
+        processInput(window, camera, deltaTime, sun, earth);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -150,15 +204,29 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         sun.update(deltaTime);
+        std::cout << deltaTime << std::endl;
         sun.draw(shaderProgram);
 
         earth.update(deltaTime);
         earth.draw(shaderProgram);
 
+        moon.update(deltaTime);
+        moon.draw(shaderProgram);
+
+        mars.update(deltaTime);
+        mars.draw(shaderProgram);
+
+        venus.update(deltaTime);
+        venus.draw(shaderProgram);
+
+        neptune.update(deltaTime);
+        neptune.draw(shaderProgram);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
         timer.stop();
         deltaTime = timer.getElapsedTime();
+        std::cout << deltaTime << std::endl;
     }
 
     glfwTerminate();
