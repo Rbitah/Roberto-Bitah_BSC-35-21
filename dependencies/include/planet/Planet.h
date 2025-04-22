@@ -21,6 +21,16 @@ public:
     void setScale(float scale);
     void setOrbit(float radius, float speed, const glm::vec3 &center = glm::vec3(0.0f));
 
+    void increaseRotationSpeed();
+    void decreaseRotationSpeed();
+    void increaseOrbitSpeed();
+    void decreaseOrbitSpeed();
+
+    float getRotationSpeed() const { return rotationSpeed; };
+    float getOrbitingSpeed() const { return orbitSpeed; };
+
+    glm::vec3 getPosition() const;
+
 
 private:
     Sphere sphere;

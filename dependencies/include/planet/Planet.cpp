@@ -93,3 +93,29 @@ unsigned int Planet::loadTexture(const std::string &path)
 
     return texID;
 }
+
+void Planet::increaseRotationSpeed()
+{
+    orbitSpeed += 0.1f;
+}
+void Planet::decreaseRotationSpeed()
+{
+    orbitSpeed -= 0.01f;
+    if (orbitSpeed < 0.0f)
+        orbitSpeed = 0.0f;
+}
+void Planet::increaseOrbitSpeed()
+{
+    rotationSpeed += 0.01f;
+}
+void Planet::decreaseOrbitSpeed()
+{
+    rotationSpeed -= 0.1f;
+    if (rotationSpeed < 0.0f)
+        rotationSpeed = 0.0f;
+}
+glm::vec3 Planet::getPosition() const {
+    return position;
+}
+
+
