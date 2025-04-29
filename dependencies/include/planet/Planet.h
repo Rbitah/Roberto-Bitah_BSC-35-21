@@ -28,7 +28,7 @@ public:
 
     float getRotationSpeed() const { return rotationSpeed; };
     float getOrbitingSpeed() const { return orbitSpeed; };
-
+    void setOrbitCenter(const glm::vec3 &center) { orbitCenter = center; };
     glm::vec3 getPosition() const;
 
 
