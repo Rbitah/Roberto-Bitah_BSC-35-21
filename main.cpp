@@ -8,8 +8,47 @@
 #include "Timer/Timer.h"
 #include <camera/camera.h>
 
-void processInput(GLFWwindow *window, Camera &camera, float deltaTime, Planet &sun, Planet &earth)
+float yaw = -90.0f;
+float pitch = 0.0f;
+float lastX = 800.0f;
+float lastY = 600.0f; 
+bool firstMouse = true;
+
+
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; 
+
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void processInput(GLFWwindow *window, Camera &camera, float deltaTime, Planet &sun, Planet &moon)
+{ // camera keys control
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -27,9 +66,9 @@ void processInput(GLFWwindow *window, Camera &camera, float deltaTime, Planet &s
 
     // Moon's orbit speed
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        earth.increaseRotationSpeed();
+        moon.increaseRotationSpeed();
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        earth.decreaseRotationSpeed();
+        moon.decreaseRotationSpeed();
 }
 
 const char *vertexShaderSource = "#version 330 core\n"
@@ -65,8 +104,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
-
 int main()
 {
     glfwInit();
@@ -83,7 +120,13 @@ int main()
     }
 
     glfwMakeContextCurrent(window);
+     
+    //coloring
 
+
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -160,12 +203,11 @@ int main()
     earth.setOrbit(0.9f, 0.5f);
 
     // creating moon
-    Planet moon(0.03f, 72, 36, "PlanetTextureMaps/earthmap1k.jpg");
-    moon.setPosition(glm::vec3(1.51f, 0.0f, 0.0f));
-    moon.setRotationSpeed(2.0f);
+    Planet moon(0.03f, 72, 36, "PlanetTextureMaps/moonmap1k.jpg");
+    moon.setPosition(glm::vec3(1.5f, 0.0f, 0.0f));
+    moon.setRotationSpeed(2.3f);
     moon.setScale(1.01f);
-    moon.setOrbit(1.11f, 0.5f);
-
+    moon.setOrbit(0.14f, 4.85f);
     // creating mars
     Planet mars(0.07f, 72, 36, "PlanetTextureMaps/marsmap1k.jpg");
     mars.setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
@@ -192,9 +234,9 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         timer.start();
-        processInput(window, camera, deltaTime, sun, earth);
+        processInput(window, camera, deltaTime, sun, moon);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
@@ -205,10 +247,12 @@ int main()
 
         sun.update(deltaTime);
         std::cout << deltaTime << std::endl;
+        glm::vec3 earthPos = earth.getPosition();
         sun.draw(shaderProgram);
 
         earth.update(deltaTime);
         earth.draw(shaderProgram);
+        moon.setOrbitCenter(earth.getPosition());
 
         moon.update(deltaTime);
         moon.draw(shaderProgram);
