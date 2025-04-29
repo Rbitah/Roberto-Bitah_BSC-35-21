@@ -8,7 +8,7 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${workspaceFolder}/main.cpp",
+                "${workspaceFolder}/src/main.cpp",
                 "${workspaceFolder}/dependencies/include/planet/Planet.cpp",
                 "${workspaceFolder}/dependencies/include/Timer/Timer.cpp",
                 "${workspaceFolder}/dependencies/include/Sphere/Sphere.cpp",
