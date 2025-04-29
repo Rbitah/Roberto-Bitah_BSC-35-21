@@ -55,5 +55,6 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "C_Cpp_Runner.msvcSecureNoWarnings": false
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "cmake.sourceDirectory": "E:/school/3rdyear 2ndsem/COM324/Com324_practicuum/Roberto-Bitah_BSC-35-21/dependencies/include/glm"
 }
