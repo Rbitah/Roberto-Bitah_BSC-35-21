@@ -12,12 +12,12 @@
 float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 800.0f;
-float lastY = 600.0f; 
+float lastY = 600.0f;
 bool firstMouse = true;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 {
     if (firstMouse)
     {
@@ -27,7 +27,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; 
+    float yoffset = lastY - ypos;
 
     lastX = xpos;
     lastY = ypos;
@@ -92,22 +92,21 @@ int main()
     }
 
     glfwMakeContextCurrent(window);
-     
-    //coloring
 
+    // coloring
 
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    
+
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
     glEnable(GL_DEPTH_TEST);
-    
+
     Shader ourShader("dependencies/include/shadersPrograms/vertexShader.glsl", "dependencies/include/shadersPrograms/fragmentShader.glsl");
-    
+
     // creating sun
     Planet sun(0.2f, 72, 36, "PlanetTextureMaps/sunmap.jpg");
     sun.setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -155,8 +154,6 @@ int main()
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-   
-
     while (!glfwWindowShouldClose(window))
     {
         timer.start();
@@ -167,9 +164,9 @@ int main()
 
         ourShader.use();
 
-       glm::mat4 view = camera.GetViewMatrix();
-       ourShader.setMat4("view", view);
-       ourShader.setMat4("projection", projection);
+        glm::mat4 view = camera.GetViewMatrix();
+        ourShader.setMat4("view", view);
+        ourShader.setMat4("projection", projection);
 
         sun.update(deltaTime);
         std::cout << deltaTime << std::endl;
