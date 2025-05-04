@@ -7,13 +7,13 @@
 #include "planet/Planet.h"
 #include "Timer/Timer.h"
 #include <camera/camera.h>
+#include <shadersPrograms/shader.h>
 
 float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 800.0f;
 float lastY = 600.0f; 
 bool firstMouse = true;
-
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
@@ -71,34 +71,6 @@ void processInput(GLFWwindow *window, Camera &camera, float deltaTime, Planet &s
         moon.decreaseRotationSpeed();
 }
 
-const char *vertexShaderSource = "#version 330 core\n"
-                                 "layout (location = 0) in vec3 aPos;\n"
-                                 "layout (location = 1) in vec3 aNormal;\n"
-                                 "layout (location = 2) in vec2 aTexCoord;\n"
-                                 "\n"
-                                 "uniform mat4 transform;\n"
-                                 "uniform mat4 view;\n"
-                                 "uniform mat4 projection;\n"
-                                 "\n"
-                                 "out vec2 TexCoord;\n"
-                                 "\n"
-                                 "void main()\n"
-                                 "{\n"
-                                 "    gl_Position = projection * view * transform * vec4(aPos, 1.0);\n"
-                                 "    TexCoord = aTexCoord;\n"
-                                 "}\n";
-
-const char *fragmentShaderSource = "#version 330 core\n"
-                                   "in vec2 TexCoord;\n"
-                                   "out vec4 FragColor;\n"
-                                   "\n"
-                                   "uniform sampler2D ourTexture;\n"
-                                   "\n"
-                                   "void main()\n"
-                                   "{\n"
-                                   "    FragColor = texture(ourTexture, TexCoord);\n"
-                                   "}\n";
-
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -133,55 +105,9 @@ int main()
         return -1;
     }
     glEnable(GL_DEPTH_TEST);
-
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-                  << infoLog << std::endl;
-    }
-
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-                  << infoLog << std::endl;
-    }
-
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-    if (!success)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-                  << infoLog << std::endl;
-    }
-
-    glUseProgram(shaderProgram);
-    glUniform1i(glGetUniformLocation(shaderProgram, "ourTexture"), 0);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
+    
+    Shader ourShader("dependencies/include/shadersPrograms/vertexShader.glsl", "dependencies/include/shadersPrograms/fragmentShader.glsl");
+    
     // creating sun
     Planet sun(0.2f, 72, 36, "PlanetTextureMaps/sunmap.jpg");
     sun.setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -229,7 +155,7 @@ int main()
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    glUseProgram(shaderProgram);
+   
 
     while (!glfwWindowShouldClose(window))
     {
@@ -239,32 +165,32 @@ int main()
         glClearColor(0.0f, 0.0f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        ourShader.use();
 
-        glm::mat4 view = camera.GetViewMatrix();
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+       glm::mat4 view = camera.GetViewMatrix();
+       ourShader.setMat4("view", view);
+       ourShader.setMat4("projection", projection);
 
         sun.update(deltaTime);
         std::cout << deltaTime << std::endl;
         glm::vec3 earthPos = earth.getPosition();
-        sun.draw(shaderProgram);
+        sun.draw(ourShader.ID);
 
         earth.update(deltaTime);
-        earth.draw(shaderProgram);
+        earth.draw(ourShader.ID);
         moon.setOrbitCenter(earth.getPosition());
 
         moon.update(deltaTime);
-        moon.draw(shaderProgram);
+        moon.draw(ourShader.ID);
 
         mars.update(deltaTime);
-        mars.draw(shaderProgram);
+        mars.draw(ourShader.ID);
 
         venus.update(deltaTime);
-        venus.draw(shaderProgram);
+        venus.draw(ourShader.ID);
 
         neptune.update(deltaTime);
-        neptune.draw(shaderProgram);
+        neptune.draw(ourShader.ID);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

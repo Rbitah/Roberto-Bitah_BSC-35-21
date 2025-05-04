@@ -9,6 +9,7 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${workspaceFolder}/src/main.cpp",
+                "${workspaceFolder}/dependencies/include/shadersPrograms/shader.cpp",
                 "${workspaceFolder}/dependencies/include/planet/Planet.cpp",
                 "${workspaceFolder}/dependencies/include/Timer/Timer.cpp",
                 "${workspaceFolder}/dependencies/include/Sphere/Sphere.cpp",
