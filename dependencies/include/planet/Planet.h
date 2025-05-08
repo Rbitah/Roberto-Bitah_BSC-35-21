@@ -16,7 +16,7 @@ public:
     void update(float deltaTime);
     void draw(unsigned int shaderProgram);
 
-    void setPosition(const glm::vec3 &position);
+    void setPlanetPos(const glm::vec3 &position);
     void setRotationSpeed(float speed);
     void setScale(float scale);
     void setOrbit(float radius, float speed, const glm::vec3 &center = glm::vec3(0.0f));
@@ -26,11 +26,19 @@ public:
     void increaseOrbitSpeed();
     void decreaseOrbitSpeed();
 
-    float getRotationSpeed() const { return rotationSpeed; };
-    float getOrbitingSpeed() const { return orbitSpeed; };
-    void setOrbitCenter(const glm::vec3 &center) { orbitCenter = center; };
-    glm::vec3 getPosition() const;
-
+    float getRotationSpeed() const
+    {
+        return rotationSpeed;
+    };
+    float getOrbitingSpeed() const
+    {
+        return orbitSpeed;
+    };
+    void setOrbitCenter(const glm::vec3 &center)
+    {
+        orbitCenter = center;
+    };
+    glm::vec3 getPlanetPosi() const;
 
 private:
     Sphere sphere;

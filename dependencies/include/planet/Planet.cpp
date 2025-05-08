@@ -8,23 +8,18 @@ Planet::Planet(float radius, int sectors, int stacks, const std::string &texture
 {
     textureID = loadTexture(texturePath);
 }
-
 Planet::~Planet()
 {
     glDeleteTextures(1, &textureID);
 }
-
 void Planet::update(float deltaTime)
 {
-    //rotation
+    // rotation
     angle += rotationSpeed * deltaTime;
-
-    // Orbiting
     orbitAngle += orbitSpeed * deltaTime;
     position.x = orbitCenter.x + orbitRadius * cos(orbitAngle);
     position.z = orbitCenter.z + orbitRadius * sin(orbitAngle);
 }
-
 void Planet::draw(unsigned int shaderProgram)
 {
     glUseProgram(shaderProgram);
@@ -36,22 +31,19 @@ void Planet::draw(unsigned int shaderProgram)
     trans = rotate(trans, angle, glm::vec3(0.0f, 1.0f, 0.0f));
     trans = glm::scale(trans, glm::vec3(scale));
 
-    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
     sphere.draw();
 }
-
-void Planet::setPosition(const glm::vec3 &pos)
+void Planet::setPlanetPos(const glm::vec3 &pos)
 {
     position = pos;
 }
-
 void Planet::setRotationSpeed(float speed)
 {
     rotationSpeed = speed;
 }
-
 void Planet::setScale(float s)
 {
     scale = s;
@@ -62,7 +54,6 @@ void Planet::setOrbit(float radius, float speed, const glm::vec3 &center)
     orbitSpeed = speed;
     orbitCenter = center;
 }
-
 unsigned int Planet::loadTexture(const std::string &path)
 {
     unsigned int texID;
@@ -80,7 +71,6 @@ unsigned int Planet::loadTexture(const std::string &path)
 
     if (data)
     {
-
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
         stbi_image_free(data);
@@ -93,7 +83,6 @@ unsigned int Planet::loadTexture(const std::string &path)
 
     return texID;
 }
-
 void Planet::increaseRotationSpeed()
 {
     orbitSpeed += 0.1f;
@@ -110,12 +99,11 @@ void Planet::increaseOrbitSpeed()
 }
 void Planet::decreaseOrbitSpeed()
 {
-    rotationSpeed -= 0.1f;
+    rotationSpeed -= 0.11f;
     if (rotationSpeed < 0.0f)
         rotationSpeed = 0.0f;
 }
-glm::vec3 Planet::getPosition() const {
+glm::vec3 Planet::getPlanetPosi() const
+{
     return position;
 }
-
-
