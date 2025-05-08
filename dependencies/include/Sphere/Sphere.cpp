@@ -12,29 +12,23 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef _WIN32
-//#include <windows.h>    // include windows.h to avoid thousands of compile errors even though this class is not depending on Windows
+// #include <windows.h>    // include windows.h to avoid thousands of compile errors even though this class is not depending on Windows
 #endif
 #include <glad/glad.h>
 #ifdef __APPLE__
-//nclude <OpenGL/gl.h>
+// nclude <OpenGL/gl.h>
 #else
-//nclude <GL/gl.h>
+// nclude <GL/gl.h>
 #endif
-
 
 #include <iostream>
 #include <iomanip>
 #include <cmath>
 #include "Sphere.h"
 
-
-
-
 // constants //////////////////////////////////////////////////////////////////
 const int MIN_SECTOR_COUNT = 2;
-const int MIN_STACK_COUNT  = 2;
-
-
+const int MIN_STACK_COUNT = 2;
 
 ///////////////////////////////////////////////////////////////////////////////
 // ctor
@@ -44,27 +38,25 @@ Sphere::Sphere(float radius, int sectors, int stacks, bool smooth, int up) : int
     set(radius, sectors, stacks, smooth, up);
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // setters
 ///////////////////////////////////////////////////////////////////////////////
 void Sphere::set(float radius, int sectors, int stacks, bool smooth, int up)
 {
-    if(radius > 0)
+    if (radius > 0)
         this->radius = radius;
     this->sectorCount = sectors;
-    if(sectors < MIN_SECTOR_COUNT)
+    if (sectors < MIN_SECTOR_COUNT)
         this->sectorCount = MIN_SECTOR_COUNT;
     this->stackCount = stacks;
-    if(stacks < MIN_STACK_COUNT)
+    if (stacks < MIN_STACK_COUNT)
         this->stackCount = MIN_STACK_COUNT;
     this->smooth = smooth;
     this->upAxis = up;
-    if(up < 1 || up > 3)
+    if (up < 1 || up > 3)
         this->upAxis = 3;
 
-    if(smooth)
+    if (smooth)
         buildVerticesSmooth();
     else
         buildVerticesFlat();
@@ -72,29 +64,29 @@ void Sphere::set(float radius, int sectors, int stacks, bool smooth, int up)
 
 void Sphere::setRadius(float radius)
 {
-    if(radius != this->radius)
+    if (radius != this->radius)
         set(radius, sectorCount, stackCount, smooth, upAxis);
 }
 
 void Sphere::setSectorCount(int sectors)
 {
-    if(sectors != this->sectorCount)
+    if (sectors != this->sectorCount)
         set(radius, sectors, stackCount, smooth, upAxis);
 }
 
 void Sphere::setStackCount(int stacks)
 {
-    if(stacks != this->stackCount)
+    if (stacks != this->stackCount)
         set(radius, sectorCount, stacks, smooth, upAxis);
 }
 
 void Sphere::setSmooth(bool smooth)
 {
-    if(this->smooth == smooth)
+    if (this->smooth == smooth)
         return;
 
     this->smooth = smooth;
-    if(smooth)
+    if (smooth)
         buildVerticesSmooth();
     else
         buildVerticesFlat();
@@ -102,14 +94,12 @@ void Sphere::setSmooth(bool smooth)
 
 void Sphere::setUpAxis(int up)
 {
-    if(this->upAxis == up || up < 1 || up > 3)
+    if (this->upAxis == up || up < 1 || up > 3)
         return;
 
     changeUpAxis(this->upAxis, up);
     this->upAxis = up;
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // flip the face normals to opposite directions
@@ -118,30 +108,28 @@ void Sphere::reverseNormals()
 {
     std::size_t i, j;
     std::size_t count = normals.size();
-    for(i = 0, j = 3; i < count; i+=3, j+=8)
+    for (i = 0, j = 3; i < count; i += 3, j += 8)
     {
-        normals[i]   *= -1;
-        normals[i+1] *= -1;
-        normals[i+2] *= -1;
+        normals[i] *= -1;
+        normals[i + 1] *= -1;
+        normals[i + 2] *= -1;
 
         // update interleaved array
-        interleavedVertices[j]   = normals[i];
-        interleavedVertices[j+1] = normals[i+1];
-        interleavedVertices[j+2] = normals[i+2];
+        interleavedVertices[j] = normals[i];
+        interleavedVertices[j + 1] = normals[i + 1];
+        interleavedVertices[j + 2] = normals[i + 2];
     }
 
     // also reverse triangle windings
     unsigned int tmp;
     count = indices.size();
-    for(i = 0; i < count; i+=3)
+    for (i = 0; i < count; i += 3)
     {
         tmp = indices[i];
-        indices[i]   = indices[i+2];
-        indices[i+2] = tmp;
+        indices[i] = indices[i + 2];
+        indices[i + 2] = tmp;
     }
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // print itself
@@ -161,19 +149,17 @@ void Sphere::printSelf() const
               << "TexCoord Count: " << getTexCoordCount() << std::endl;
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // draw a sphere in VertexArray mode
 // OpenGL RC must be set before calling it
 ///////////////////////////////////////////////////////////////////////////////
-void Sphere::draw() const {
-    if (!buffersInitialized) {
-        // Generate buffers
+void Sphere::draw() const
+{
+    if (!buffersInitialized)
+    {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
         glGenBuffers(1, &EBO);
-
         glBindVertexArray(VAO);
 
         // Upload vertex data
@@ -186,22 +172,17 @@ void Sphere::draw() const {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
                      indices.data(), GL_STATIC_DRAW);
 
-        // layout (location = 0) = position
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, interleavedStride, (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, interleavedStride, (void *)0);
         glEnableVertexAttribArray(0);
-
-        // layout (location = 1) = normal
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, interleavedStride, (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, interleavedStride, (void *)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
-        // layout (location = 2) = texCoord
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, interleavedStride, (void*)(6 * sizeof(float)));
+        // texCoord
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, interleavedStride, (void *)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
         buffersInitialized = true;
-        //number of triangles used?
-        std::cout << "[Sphere] VAO created with " << indices.size() / 3 << " triangles.\n";
     }
 
     glBindVertexArray(VAO);
@@ -209,19 +190,16 @@ void Sphere::draw() const {
     glBindVertexArray(0);
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // draw lines only
 ///////////////////////////////////////////////////////////////////////////////
-void Sphere::drawLines(const float [4]) const {
-    // Render wireframe 
+void Sphere::drawLines(const float[4]) const
+{
+    // Render
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     draw();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // draw a sphere surfaces and lines on top of it
@@ -237,8 +215,6 @@ void Sphere::drawWithLines(const float lineColor[4]) const
     // draw lines with VA
     drawLines(lineColor);
 }
-
-
 
 /*@@ FIXME: when the radius = 0
 ///////////////////////////////////////////////////////////////////////////////
@@ -264,8 +240,6 @@ void Sphere::updateRadius()
 }
 */
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // dealloc vectors
 ///////////////////////////////////////////////////////////////////////////////
@@ -277,8 +251,6 @@ void Sphere::clearArrays()
     std::vector<unsigned int>().swap(indices);
     std::vector<unsigned int>().swap(lineIndices);
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // build vertices of sphere with smooth shading using parametric equation
@@ -295,29 +267,29 @@ void Sphere::buildVerticesSmooth()
     // clear memory of prev arrays
     clearArrays();
 
-    float x, y, z, xy;                              // vertex position
-    float nx, ny, nz, lengthInv = 1.0f / radius;    // normal
-    float s, t;                                     // texCoord
+    float x, y, z, xy;                           // vertex position
+    float nx, ny, nz, lengthInv = 1.0f / radius; // normal
+    float s, t;                                  // texCoord
 
     float sectorStep = 2 * PI / sectorCount;
     float stackStep = PI / stackCount;
     float sectorAngle, stackAngle;
 
-    for(int i = 0; i <= stackCount; ++i)
+    for (int i = 0; i <= stackCount; ++i)
     {
-        stackAngle = PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);             // r * cos(u)
-        z = radius * sinf(stackAngle);              // r * sin(u)
+        stackAngle = PI / 2 - i * stackStep; // starting from pi/2 to -pi/2
+        xy = radius * cosf(stackAngle);      // r * cos(u)
+        z = radius * sinf(stackAngle);       // r * sin(u)
 
         // add (sectorCount+1) vertices per stack
         // the first and last vertices have same position and normal, but different tex coords
-        for(int j = 0; j <= sectorCount; ++j)
+        for (int j = 0; j <= sectorCount; ++j)
         {
-            sectorAngle = j * sectorStep;           // starting from 0 to 2pi
+            sectorAngle = j * sectorStep; // starting from 0 to 2pi
 
             // vertex position
-            x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
-            y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
+            x = xy * cosf(sectorAngle); // r * cos(u) * cos(v)
+            y = xy * sinf(sectorAngle); // r * cos(u) * sin(v)
             addVertex(x, y, z);
 
             // normalized vertex normal
@@ -339,28 +311,28 @@ void Sphere::buildVerticesSmooth()
     //  | /  |
     //  k2--k2+1
     unsigned int k1, k2;
-    for(int i = 0; i < stackCount; ++i)
+    for (int i = 0; i < stackCount; ++i)
     {
-        k1 = i * (sectorCount + 1);     // beginning of current stack
-        k2 = k1 + sectorCount + 1;      // beginning of next stack
+        k1 = i * (sectorCount + 1); // beginning of current stack
+        k2 = k1 + sectorCount + 1;  // beginning of next stack
 
-        for(int j = 0; j < sectorCount; ++j, ++k1, ++k2)
+        for (int j = 0; j < sectorCount; ++j, ++k1, ++k2)
         {
             // 2 triangles per sector excluding 1st and last stacks
-            if(i != 0)
+            if (i != 0)
             {
-                addIndices(k1, k2, k1+1);   // k1---k2---k1+1
+                addIndices(k1, k2, k1 + 1); // k1---k2---k1+1
             }
 
-            if(i != (stackCount-1))
+            if (i != (stackCount - 1))
             {
-                addIndices(k1+1, k2, k2+1); // k1+1---k2---k2+1
+                addIndices(k1 + 1, k2, k2 + 1); // k1+1---k2---k2+1
             }
 
             // vertical lines for all stacks
             lineIndices.push_back(k1);
             lineIndices.push_back(k2);
-            if(i != 0)  // horizontal lines except 1st stack
+            if (i != 0) // horizontal lines except 1st stack
             {
                 lineIndices.push_back(k1);
                 lineIndices.push_back(k1 + 1);
@@ -372,11 +344,9 @@ void Sphere::buildVerticesSmooth()
     buildInterleavedVertices();
 
     // change up axis from Z-axis to the given
-    if(this->upAxis != 3)
+    if (this->upAxis != 3)
         changeUpAxis(3, this->upAxis);
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // generate vertices with flat shading
@@ -398,24 +368,24 @@ void Sphere::buildVerticesFlat()
     float sectorAngle, stackAngle;
 
     // compute all vertices first, each vertex contains (x,y,z,s,t) except normal
-    for(int i = 0; i <= stackCount; ++i)
+    for (int i = 0; i <= stackCount; ++i)
     {
-        stackAngle = PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
-        float xy = radius * cosf(stackAngle);       // r * cos(u)
-        float z = radius * sinf(stackAngle);        // r * sin(u)
+        stackAngle = PI / 2 - i * stackStep;  // starting from pi/2 to -pi/2
+        float xy = radius * cosf(stackAngle); // r * cos(u)
+        float z = radius * sinf(stackAngle);  // r * sin(u)
 
         // add (sectorCount+1) vertices per stack
         // the first and last vertices have same position and normal, but different tex coords
-        for(int j = 0; j <= sectorCount; ++j)
+        for (int j = 0; j <= sectorCount; ++j)
         {
-            sectorAngle = j * sectorStep;           // starting from 0 to 2pi
+            sectorAngle = j * sectorStep; // starting from 0 to 2pi
 
             Vertex vertex;
-            vertex.x = xy * cosf(sectorAngle);      // x = r * cos(u) * cos(v)
-            vertex.y = xy * sinf(sectorAngle);      // y = r * cos(u) * sin(v)
-            vertex.z = z;                           // z = r * sin(u)
-            vertex.s = (float)j/sectorCount;        // s
-            vertex.t = (float)i/stackCount;         // t
+            vertex.x = xy * cosf(sectorAngle); // x = r * cos(u) * cos(v)
+            vertex.y = xy * sinf(sectorAngle); // y = r * cos(u) * sin(v)
+            vertex.z = z;                      // z = r * sin(u)
+            vertex.s = (float)j / sectorCount; // s
+            vertex.t = (float)i / stackCount;  // t
             tmpVertices.push_back(vertex);
         }
     }
@@ -423,17 +393,17 @@ void Sphere::buildVerticesFlat()
     // clear memory of prev arrays
     clearArrays();
 
-    Vertex v1, v2, v3, v4;                          // 4 vertex positions and tex coords
-    std::vector<float> n;                           // 1 face normal
+    Vertex v1, v2, v3, v4; // 4 vertex positions and tex coords
+    std::vector<float> n;  // 1 face normal
 
     int i, j, k, vi1, vi2;
-    int index = 0;                                  // index for vertex
-    for(i = 0; i < stackCount; ++i)
+    int index = 0; // index for vertex
+    for (i = 0; i < stackCount; ++i)
     {
-        vi1 = i * (sectorCount + 1);                // index of tmpVertices
+        vi1 = i * (sectorCount + 1); // index of tmpVertices
         vi2 = (i + 1) * (sectorCount + 1);
 
-        for(j = 0; j < sectorCount; ++j, ++vi1, ++vi2)
+        for (j = 0; j < sectorCount; ++j, ++vi1, ++vi2)
         {
             // get 4 vertices per sector
             //  v1--v3
@@ -446,7 +416,7 @@ void Sphere::buildVerticesFlat()
 
             // if 1st stack and last stack, store only 1 triangle per sector
             // otherwise, store 2 triangles (quad) per sector
-            if(i == 0) // a triangle for first stack ==========================
+            if (i == 0) // a triangle for first stack ==========================
             {
                 // put a triangle
                 addVertex(v1.x, v1.y, v1.z);
@@ -459,22 +429,22 @@ void Sphere::buildVerticesFlat()
                 addTexCoord(v4.s, v4.t);
 
                 // put normal
-                n = computeFaceNormal(v1.x,v1.y,v1.z, v2.x,v2.y,v2.z, v4.x,v4.y,v4.z);
-                for(k = 0; k < 3; ++k)  // same normals for 3 vertices
+                n = computeFaceNormal(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v4.x, v4.y, v4.z);
+                for (k = 0; k < 3; ++k) // same normals for 3 vertices
                 {
                     addNormal(n[0], n[1], n[2]);
                 }
 
                 // put indices of 1 triangle
-                addIndices(index, index+1, index+2);
+                addIndices(index, index + 1, index + 2);
 
                 // indices for line (first stack requires only vertical line)
                 lineIndices.push_back(index);
-                lineIndices.push_back(index+1);
+                lineIndices.push_back(index + 1);
 
-                index += 3;     // for next
+                index += 3; // for next
             }
-            else if(i == (stackCount-1)) // a triangle for last stack =========
+            else if (i == (stackCount - 1)) // a triangle for last stack =========
             {
                 // put a triangle
                 addVertex(v1.x, v1.y, v1.z);
@@ -487,22 +457,22 @@ void Sphere::buildVerticesFlat()
                 addTexCoord(v3.s, v3.t);
 
                 // put normal
-                n = computeFaceNormal(v1.x,v1.y,v1.z, v2.x,v2.y,v2.z, v3.x,v3.y,v3.z);
-                for(k = 0; k < 3; ++k)  // same normals for 3 vertices
+                n = computeFaceNormal(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
+                for (k = 0; k < 3; ++k) // same normals for 3 vertices
                 {
                     addNormal(n[0], n[1], n[2]);
                 }
 
                 // put indices of 1 triangle
-                addIndices(index, index+1, index+2);
+                addIndices(index, index + 1, index + 2);
 
                 // indices for lines (last stack requires both vert/hori lines)
                 lineIndices.push_back(index);
-                lineIndices.push_back(index+1);
+                lineIndices.push_back(index + 1);
                 lineIndices.push_back(index);
-                lineIndices.push_back(index+2);
+                lineIndices.push_back(index + 2);
 
-                index += 3;     // for next
+                index += 3; // for next
             }
             else // 2 triangles for others ====================================
             {
@@ -519,23 +489,23 @@ void Sphere::buildVerticesFlat()
                 addTexCoord(v4.s, v4.t);
 
                 // put normal
-                n = computeFaceNormal(v1.x,v1.y,v1.z, v2.x,v2.y,v2.z, v3.x,v3.y,v3.z);
-                for(k = 0; k < 4; ++k)  // same normals for 4 vertices
+                n = computeFaceNormal(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
+                for (k = 0; k < 4; ++k) // same normals for 4 vertices
                 {
                     addNormal(n[0], n[1], n[2]);
                 }
 
                 // put indices of quad (2 triangles)
-                addIndices(index, index+1, index+2);
-                addIndices(index+2, index+1, index+3);
+                addIndices(index, index + 1, index + 2);
+                addIndices(index + 2, index + 1, index + 3);
 
                 // indices for lines
                 lineIndices.push_back(index);
-                lineIndices.push_back(index+1);
+                lineIndices.push_back(index + 1);
                 lineIndices.push_back(index);
-                lineIndices.push_back(index+2);
+                lineIndices.push_back(index + 2);
 
-                index += 4;     // for next
+                index += 4; // for next
             }
         }
     }
@@ -544,11 +514,9 @@ void Sphere::buildVerticesFlat()
     buildInterleavedVertices();
 
     // change up axis from Z-axis to the given
-    if(this->upAxis != 3)
+    if (this->upAxis != 3)
         changeUpAxis(3, this->upAxis);
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // generate interleaved vertices: V/N/T
@@ -560,22 +528,20 @@ void Sphere::buildInterleavedVertices()
 
     std::size_t i, j;
     std::size_t count = vertices.size();
-    for(i = 0, j = 0; i < count; i += 3, j += 2)
+    for (i = 0, j = 0; i < count; i += 3, j += 2)
     {
         interleavedVertices.push_back(vertices[i]);
-        interleavedVertices.push_back(vertices[i+1]);
-        interleavedVertices.push_back(vertices[i+2]);
+        interleavedVertices.push_back(vertices[i + 1]);
+        interleavedVertices.push_back(vertices[i + 2]);
 
         interleavedVertices.push_back(normals[i]);
-        interleavedVertices.push_back(normals[i+1]);
-        interleavedVertices.push_back(normals[i+2]);
+        interleavedVertices.push_back(normals[i + 1]);
+        interleavedVertices.push_back(normals[i + 2]);
 
         interleavedVertices.push_back(texCoords[j]);
-        interleavedVertices.push_back(texCoords[j+1]);
+        interleavedVertices.push_back(texCoords[j + 1]);
     }
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // transform vertex/normal (x,y,z) coords
@@ -584,80 +550,90 @@ void Sphere::buildInterleavedVertices()
 void Sphere::changeUpAxis(int from, int to)
 {
     // initial transform matrix cols
-    float tx[] = {1.0f, 0.0f, 0.0f};    // x-axis (left)
-    float ty[] = {0.0f, 1.0f, 0.0f};    // y-axis (up)
-    float tz[] = {0.0f, 0.0f, 1.0f};    // z-axis (forward)
+    float tx[] = {1.0f, 0.0f, 0.0f}; // x-axis (left)
+    float ty[] = {0.0f, 1.0f, 0.0f}; // y-axis (up)
+    float tz[] = {0.0f, 0.0f, 1.0f}; // z-axis (forward)
 
     // X -> Y
-    if(from == 1 && to == 2)
+    if (from == 1 && to == 2)
     {
-        tx[0] =  0.0f; tx[1] =  1.0f;
-        ty[0] = -1.0f; ty[1] =  0.0f;
+        tx[0] = 0.0f;
+        tx[1] = 1.0f;
+        ty[0] = -1.0f;
+        ty[1] = 0.0f;
     }
     // X -> Z
-    else if(from == 1 && to == 3)
+    else if (from == 1 && to == 3)
     {
-        tx[0] =  0.0f; tx[2] =  1.0f;
-        tz[0] = -1.0f; tz[2] =  0.0f;
+        tx[0] = 0.0f;
+        tx[2] = 1.0f;
+        tz[0] = -1.0f;
+        tz[2] = 0.0f;
     }
     // Y -> X
-    else if(from == 2 && to == 1)
+    else if (from == 2 && to == 1)
     {
-        tx[0] =  0.0f; tx[1] = -1.0f;
-        ty[0] =  1.0f; ty[1] =  0.0f;
+        tx[0] = 0.0f;
+        tx[1] = -1.0f;
+        ty[0] = 1.0f;
+        ty[1] = 0.0f;
     }
     // Y -> Z
-    else if(from == 2 && to == 3)
+    else if (from == 2 && to == 3)
     {
-        ty[1] =  0.0f; ty[2] =  1.0f;
-        tz[1] = -1.0f; tz[2] =  0.0f;
+        ty[1] = 0.0f;
+        ty[2] = 1.0f;
+        tz[1] = -1.0f;
+        tz[2] = 0.0f;
     }
     //  Z -> X
-    else if(from == 3 && to == 1)
+    else if (from == 3 && to == 1)
     {
-        tx[0] =  0.0f; tx[2] = -1.0f;
-        tz[0] =  1.0f; tz[2] =  0.0f;
+        tx[0] = 0.0f;
+        tx[2] = -1.0f;
+        tz[0] = 1.0f;
+        tz[2] = 0.0f;
     }
     // Z -> Y
     else
     {
-        ty[1] =  0.0f; ty[2] = -1.0f;
-        tz[1] =  1.0f; tz[2] =  0.0f;
+        ty[1] = 0.0f;
+        ty[2] = -1.0f;
+        tz[1] = 1.0f;
+        tz[2] = 0.0f;
     }
 
     std::size_t i, j;
     std::size_t count = vertices.size();
     float vx, vy, vz;
     float nx, ny, nz;
-    for(i = 0, j = 0; i < count; i += 3, j += 8)
+    for (i = 0, j = 0; i < count; i += 3, j += 8)
     {
         // transform vertices
         vx = vertices[i];
-        vy = vertices[i+1];
-        vz = vertices[i+2];
-        vertices[i]   = tx[0] * vx + ty[0] * vy + tz[0] * vz;   // x
-        vertices[i+1] = tx[1] * vx + ty[1] * vy + tz[1] * vz;   // y
-        vertices[i+2] = tx[2] * vx + ty[2] * vy + tz[2] * vz;   // z
+        vy = vertices[i + 1];
+        vz = vertices[i + 2];
+        vertices[i] = tx[0] * vx + ty[0] * vy + tz[0] * vz;     // x
+        vertices[i + 1] = tx[1] * vx + ty[1] * vy + tz[1] * vz; // y
+        vertices[i + 2] = tx[2] * vx + ty[2] * vy + tz[2] * vz; // z
 
         // transform normals
         nx = normals[i];
-        ny = normals[i+1];
-        nz = normals[i+2];
-        normals[i]   = tx[0] * nx + ty[0] * ny + tz[0] * nz;   // nx
-        normals[i+1] = tx[1] * nx + ty[1] * ny + tz[1] * nz;   // ny
-        normals[i+2] = tx[2] * nx + ty[2] * ny + tz[2] * nz;   // nz
+        ny = normals[i + 1];
+        nz = normals[i + 2];
+        normals[i] = tx[0] * nx + ty[0] * ny + tz[0] * nz;     // nx
+        normals[i + 1] = tx[1] * nx + ty[1] * ny + tz[1] * nz; // ny
+        normals[i + 2] = tx[2] * nx + ty[2] * ny + tz[2] * nz; // nz
 
         // trnasform interleaved array
-        interleavedVertices[j]   = vertices[i];
-        interleavedVertices[j+1] = vertices[i+1];
-        interleavedVertices[j+2] = vertices[i+2];
-        interleavedVertices[j+3] = normals[i];
-        interleavedVertices[j+4] = normals[i+1];
-        interleavedVertices[j+5] = normals[i+2];
+        interleavedVertices[j] = vertices[i];
+        interleavedVertices[j + 1] = vertices[i + 1];
+        interleavedVertices[j + 2] = vertices[i + 2];
+        interleavedVertices[j + 3] = normals[i];
+        interleavedVertices[j + 4] = normals[i + 1];
+        interleavedVertices[j + 5] = normals[i + 2];
     }
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // add single vertex to array
@@ -669,8 +645,6 @@ void Sphere::addVertex(float x, float y, float z)
     vertices.push_back(z);
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // add single normal to array
 ///////////////////////////////////////////////////////////////////////////////
@@ -681,8 +655,6 @@ void Sphere::addNormal(float nx, float ny, float nz)
     normals.push_back(nz);
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // add single texture coord to array
 ///////////////////////////////////////////////////////////////////////////////
@@ -691,8 +663,6 @@ void Sphere::addTexCoord(float s, float t)
     texCoords.push_back(s);
     texCoords.push_back(t);
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // add 3 indices to array
@@ -704,19 +674,17 @@ void Sphere::addIndices(unsigned int i1, unsigned int i2, unsigned int i3)
     indices.push_back(i3);
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // return face normal of a triangle v1-v2-v3
 // if a triangle has no surface (normal length = 0), then return a zero vector
 ///////////////////////////////////////////////////////////////////////////////
-std::vector<float> Sphere::computeFaceNormal(float x1, float y1, float z1,  // v1
-                                             float x2, float y2, float z2,  // v2
-                                             float x3, float y3, float z3)  // v3
+std::vector<float> Sphere::computeFaceNormal(float x1, float y1, float z1, // v1
+                                             float x2, float y2, float z2, // v2
+                                             float x3, float y3, float z3) // v3
 {
     const float EPSILON = 0.000001f;
 
-    std::vector<float> normal(3, 0.0f);     // default return value (0,0,0)
+    std::vector<float> normal(3, 0.0f); // default return value (0,0,0)
     float nx, ny, nz;
 
     // find 2 edge vectors: v1-v2, v1-v3
@@ -734,7 +702,7 @@ std::vector<float> Sphere::computeFaceNormal(float x1, float y1, float z1,  // v
 
     // normalize only if the length is > 0
     float length = sqrtf(nx * nx + ny * ny + nz * nz);
-    if(length > EPSILON)
+    if (length > EPSILON)
     {
         // normalize
         float lengthInv = 1.0f / length;
