@@ -161,17 +161,12 @@ void Sphere::draw() const
         glGenBuffers(1, &VBO);
         glGenBuffers(1, &EBO);
         glBindVertexArray(VAO);
-
-        // Upload vertex data
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, interleavedVertices.size() * sizeof(float),
                      interleavedVertices.data(), GL_STATIC_DRAW);
-
-        // Upload index data
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
                      indices.data(), GL_STATIC_DRAW);
-
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, interleavedStride, (void *)0);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, interleavedStride, (void *)(3 * sizeof(float)));
