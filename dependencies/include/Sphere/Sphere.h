@@ -100,8 +100,7 @@ private:
     std::vector<float> interleavedVertices;
     int interleavedStride;
     // # of bytes to hop to the next vertex (should be 32 bytes)
-    
-    //modern OpenGL uses interleaved vertex data
+   
     mutable unsigned int VAO = 0;
     mutable unsigned int VBO = 0;
     mutable unsigned int EBO = 0;
