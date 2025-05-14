@@ -69,6 +69,9 @@ void processInput(GLFWwindow *window, Camera &camera, float deltaTime, Planet &s
         moon.increaseRotationSpeed();
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
         moon.decreaseRotationSpeed();
+    //closing window
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
